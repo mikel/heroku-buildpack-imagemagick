@@ -5,6 +5,10 @@ This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) fo
 
 This one actually works :)
 
+Currently installs ImageMagick v7.1.1-47 and works with Heroku stack 24.
+
+Other versions will have different tags.
+
 ### Install
 
 In your project root:
