@@ -9,12 +9,63 @@ echo "-----> Install ImageMagick"
 BUILD_DIR=$1
 CACHE_DIR=$2
 VENDOR_DIR="$BUILD_DIR/vendor"
-INSTALL_DIR="$VENDOR_DIR/imagemagick"
+IMAGE_MAGICK_INSTALL_DIR="$VENDOR_DIR/imagemagick"
 IMAGE_MAGICK_VERSION="${IMAGE_MAGICK_VERSION:-7.1.1-47}"
-CACHE_FILE="$CACHE_DIR/imagemagick-$IMAGE_MAGICK_VERSION.tar.gz"
+IMAGE_MAGICK_CACHE_FILE="$CACHE_DIR/imagemagick-$IMAGE_MAGICK_VERSION.tar.gz"
 
-if [ ! -f $CACHE_FILE ]; then
-  # install imagemagick
+LIBHEIF_VERSION="${1.18.2}"
+LIBHEIF_INSTALL_DIR="$VENDOR_DIR/libheif"
+LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
+
+# install libheif
+if [ ! -f $LIBHEIF_CACHE_FILE ]; then
+  echo "-----> Installing dependencies - LibHEIF1"
+  LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
+  LIBHEIF_DIR="libheif-$IMAGE_MAGICK_VERSION"
+  LIBHEIF_URL="https://github.com/strukturag/libheif/releases/download/v$LIBHEIF_VERSION/$LIBHEIF_FILE"
+
+  echo "-----> Downloading LibHEIF from $LIBHEIF_URL"
+  wget $LIBHEIF_URL -P $BUILD_DIR | indent
+
+  echo "-----> Extracting LibHEIF from $BUILD_DIR/$LIBHEIF_FILE"
+  if [ ! -f $BUILD_DIR/$LIBHEIF_FILE ]; then
+    echo "Error: Unable to download LibHEIF" | indent
+    ls $BUILD_DIR | indent
+    exit 1;
+  fi
+  tar xvf $BUILD_DIR/$LIBHEIF_FILE | indent
+
+  echo "-----> Building LibHEIF"
+  cd libheif-$LIBHEIF_VERSION
+
+  export CPPFLAGS="-I$LIBHEIF_INSTALL_DIR/include"
+  export LDFLAGS="-L$LIBHEIF_INSTALL_DIR/lib"
+  ./configure --prefix=$LIBHEIF_INSTALL_DIR
+  make && make install
+  cd ..
+  rm -rf $LIBHEIF_DIR
+
+  # cache for future deploys
+  echo "-----> Caching LibHEIF installation"
+  cd $VENDOR_DIR
+  REL_IMAGE_LIBHEIF_DIR="libheif"
+  tar czf $REL_LIBHEIF_INSTALL_DIR.tar.gz $REL_LIBHEIF_INSTALL_DIR
+
+  if [ ! -d $CACHE_DIR ]; then
+    mkdir -p $CACHE_DIR
+  fi
+
+  mv $REL_LIBHEIF_INSTALL_DIR.tar.gz $LIBHEIF_CACHE_FILE
+else
+  # cache exists, extract it
+  echo "-----> Extracting LibHEIF $LIBHEIF_CACHE_FILE => $VENDOR_DIR"
+  mkdir -p $VENDOR_DIR
+  tar xzf $LIBHEIF_CACHE_FILE -C $VENDOR_DIR
+fi
+echo "-----> Done installing LibHEIF. All set for LibHEIF."
+
+# install imagemagick
+if [ ! -f $IMAGE_MAGICK_CACHE_FILE ]; then
   IMAGE_MAGICK_FILE="ImageMagick-$IMAGE_MAGICK_VERSION.tar.xz"
   IMAGE_MAGICK_DIR="ImageMagick-$IMAGE_MAGICK_VERSION"
   IMAGE_MAGICK_URL="https://www.imagemagick.org/download/releases/$IMAGE_MAGICK_FILE"
@@ -32,9 +83,9 @@ if [ ! -f $CACHE_FILE ]; then
 
   echo "-----> Building ImageMagick"
   cd $IMAGE_MAGICK_DIR
-  export CPPFLAGS="-I$INSTALL_DIR/include"
-  export LDFLAGS="-L$INSTALL_DIR/lib"
-  ./configure --prefix=$INSTALL_DIR
+  export CPPFLAGS="-I$IMAGE_MAGICK_INSTALL_DIR/include"
+  export LDFLAGS="-L$IMAGE_MAGICK_INSTALL_DIR/lib"
+  ./configure --prefix=$IMAGE_MAGICK_INSTALL_DIR
   make && make install
   cd ..
   rm -rf $IMAGE_MAGICK_DIR
@@ -42,25 +93,25 @@ if [ ! -f $CACHE_FILE ]; then
   # cache for future deploys
   echo "-----> Caching ImageMagick installation"
   cd $VENDOR_DIR
-  REL_INSTALL_DIR="imagemagick"
-  tar czf $REL_INSTALL_DIR.tar.gz $REL_INSTALL_DIR
+  REL_IMAGE_MAGICK_INSTALL_DIR="imagemagick"
+  tar czf $REL_IMAGE_MAGICK_INSTALL_DIR.tar.gz $REL_IMAGE_MAGICK_INSTALL_DIR
 
   if [ ! -d $CACHE_DIR ]; then
     mkdir -p $CACHE_DIR
   fi
 
-  mv $REL_INSTALL_DIR.tar.gz $CACHE_FILE
+  mv $REL_IMAGE_MAGICK_INSTALL_DIR.tar.gz $IMAGE_MAGICK_CACHE_FILE
 
 else
   # cache exists, extract it
-  echo "-----> Extracting ImageMagick $CACHE_FILE => $VENDOR_DIR"
+  echo "-----> Extracting ImageMagick $IMAGE_MAGICK_CACHE_FILE => $VENDOR_DIR"
   mkdir -p $VENDOR_DIR
-  tar xzf $CACHE_FILE -C $VENDOR_DIR
+  tar xzf $IMAGE_MAGICK_CACHE_FILE -C $VENDOR_DIR
 fi
 
-echo "-----> Writing policy file"
-mkdir -p $INSTALL_DIR/etc/ImageMagick
-cat > $INSTALL_DIR/policy.xml <<EOF
+echo "-----> Writing ImageMagick policy file"
+mkdir -p $IMAGE_MAGICK_INSTALL_DIR/etc/ImageMagick
+cat > $IMAGE_MAGICK_INSTALL_DIR/policy.xml <<EOF
 <policymap>
   <policy domain="coder" rights="none" pattern="EPHEMERAL" />
   <policy domain="coder" rights="none" pattern="HTTPS" />
@@ -69,8 +120,8 @@ cat > $INSTALL_DIR/policy.xml <<EOF
 </policymap>
 EOF
 
-echo "-----> Writing config file"
-cat > $INSTALL_DIR/magic.xml <<EOF
+echo "-----> Writing ImageMagick config file"
+cat > $IMAGE_MAGICK_INSTALL_DIR/magic.xml <<EOF
 <magicmap>
  <magic name="JPEG" offset="0" target="\377\330\377"/>
  <magic name="PNG" offset="0" target="\211PNG\r\n\032\n"/>
@@ -78,7 +129,7 @@ cat > $INSTALL_DIR/magic.xml <<EOF
 EOF
 
 # update PATH and LD_LIBRARY_PATH
-echo "-----> Updating environment variables"
+echo "-----> Updating ImageMagick environment variables"
 PROFILE_PATH="$BUILD_DIR/.profile.d/imagemagick.sh"
 ACTUAL_INSTALL_PATH="$HOME/vendor/imagemagick"
 mkdir -p $(dirname $PROFILE_PATH)
