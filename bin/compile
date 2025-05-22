@@ -19,6 +19,9 @@ LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
 # install libheif
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
+  echo "-----> Installing cmake for libheif"
+  apt install cmake
+
   echo "-----> Installing dependencies - LibHEIF1"
   LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
   LIBHEIF_DIR="libheif-$IMAGE_MAGICK_VERSION"
