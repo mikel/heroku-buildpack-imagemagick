@@ -21,7 +21,7 @@ LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   LIBHEIF_INSTALL_FAILED=true
   echo "-----> Installing cmake for libheif"
-  apt install cmake
+  apt-get install cmake
 
   echo "-----> Installing dependencies - LibHEIF1"
   LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
@@ -42,9 +42,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   echo "-----> Building LibHEIF"
   cd libheif-$LIBHEIF_VERSION
 
-  export CPPFLAGS="-I$LIBHEIF_INSTALL_DIR/include"
-  export LDFLAGS="-L$LIBHEIF_INSTALL_DIR/lib"
-  ./configure --prefix=$LIBHEIF_INSTALL_DIR
+  cmake --preset=release
   make && make install
   cd ..
   rm -rf $LIBHEIF_DIR
