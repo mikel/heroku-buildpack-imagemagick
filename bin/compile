@@ -19,6 +19,7 @@ LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
 # install libheif
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
+  LIBHEIF_INSTALL_FAILED=true
   echo "-----> Installing cmake for libheif"
   apt install cmake
 
@@ -59,6 +60,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   fi
 
   mv $REL_LIBHEIF_INSTALL_DIR.tar.gz $LIBHEIF_CACHE_FILE
+  FAILED_LIBHEIF=false
 else
   # cache exists, extract it
   echo "-----> Extracting LibHEIF $LIBHEIF_CACHE_FILE => $VENDOR_DIR"
@@ -66,6 +68,11 @@ else
   tar xzf $LIBHEIF_CACHE_FILE -C $VENDOR_DIR
 fi
 echo "-----> Done installing LibHEIF. All set for LibHEIF."
+
+if [ "$INSTALL_FAILED" = true ]; then
+  echo "-----> LibHEIF installation failed. Exiting."
+  exit 1
+fi
 
 # install imagemagick
 if [ ! -f $IMAGE_MAGICK_CACHE_FILE ]; then
