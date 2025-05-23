@@ -50,7 +50,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   # cache for future deploys
   echo "-----> Caching LibHEIF installation"
   cd $VENDOR_DIR
-  REL_IMAGE_LIBHEIF_INSTALL_DIR="libheif"
+  REL_LIBHEIF_INSTALL_DIR="libheif"
   tar czf $REL_LIBHEIF_INSTALL_DIR.tar.gz $REL_LIBHEIF_INSTALL_DIR
 
   if [ ! -d $CACHE_DIR ]; then
