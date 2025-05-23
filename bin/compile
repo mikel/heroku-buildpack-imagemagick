@@ -80,8 +80,6 @@ fi
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   echo "-----> Installing dependencies - LibHEIF1"
   LIBHEIF_INSTALL_FAILED=true
-  echo "-----> Installing cmake for libheif"
-  apt-get install cmake
 
   LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
   LIBHEIF_DIR="libheif-$LIBHEIF_VERSION"
@@ -100,7 +98,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
 
   echo "-----> Building LibHEIF"
   cd $LIBHEIF_DIR
-  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR LIBDE265_INCLUDE_DIRS=$LIBDE265_INSTALL_DIR/include LIBDE265_LIBRARIES=$LIBDE265_INSTALL_DIR/lib
+  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR -DLIBDE265_INCLUDE_DIRS=$LIBDE265_INSTALL_DIR/include -DLIBDE265_LIBRARIES=$LIBDE265_INSTALL_DIR/lib
   make && make install
   cd ..
   rm -rf $LIBHEIF_DIR
