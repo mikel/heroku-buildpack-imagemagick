@@ -18,61 +18,61 @@ LIBHEIF_INSTALL_DIR="$VENDOR_DIR/libheif"
 LIBHEIF_VERSION="${LIBHEIF_VERSION:-1.19.8}"
 LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
-LIBDE256_INSTALL_DIR="$VENDOR_DIR/libde256"
-LIBDE256_VERSION="${LIBDE256_VERSION:-1.0.16}"
-LIBDE256_CACHE_FILE="$CACHE_DIR/libde256-$LIBDE256_VERSION.tar.gz"
+LIBDE265_INSTALL_DIR="$VENDOR_DIR/libde265"
+LIBDE265_VERSION="${LIBDE265_VERSION:-1.0.16}"
+LIBDE265_CACHE_FILE="$CACHE_DIR/libde265-$LIBDE265_VERSION.tar.gz"
 
 # install libde265
-if [ ! -f $LIBDE256_CACHE_FILE ]; then
-  echo "-----> Installing dependencies - libde256"
-  LIBDE256_INSTALL_FAILED=true
-  echo "-----> Installing cmake for libde256"
+if [ ! -f $LIBDE265_CACHE_FILE ]; then
+  echo "-----> Installing dependencies - libde265"
+  LIBDE265_INSTALL_FAILED=true
+  echo "-----> Installing cmake for libde265"
   apt-get install cmake
 
-  LIBDE256_FILE="libde256-$LIBDE256_VERSION.tar.gz"
-  LIBDE256_DIR="libde256-$LIBDE256_VERSION"
-  LIBDE256_URL="https://github.com/strukturag/libde256/releases/download/v$LIBDE256_VERSION/$LIBDE256_FILE"
+  LIBDE265_FILE="libde265-$LIBDE265_VERSION.tar.gz"
+  LIBDE265_DIR="libde265-$LIBDE265_VERSION"
+  LIBDE265_URL="https://github.com/strukturag/libde265/releases/download/v$LIBDE265_VERSION/$LIBDE265_FILE"
 
-  echo "-----> Downloading libde256 from $LIBDE256_URL"
-  wget $LIBDE256_URL -P $BUILD_DIR | indent
+  echo "-----> Downloading libde265 from $LIBDE265_URL"
+  wget $LIBDE265_URL -P $BUILD_DIR | indent
 
-  echo "-----> Extracting libde256 from $BUILD_DIR/$LIBDE256_FILE"
-  if [ ! -f $BUILD_DIR/$LIBDE256_FILE ]; then
-    echo "Error: Unable to download Lib256" | indent
+  echo "-----> Extracting libde265 from $BUILD_DIR/$LIBDE265_FILE"
+  if [ ! -f $BUILD_DIR/$LIBDE265_FILE ]; then
+    echo "Error: Unable to download Lib265" | indent
     ls $BUILD_DIR | indent
     exit 1;
   fi
-  tar xvf $BUILD_DIR/$LIBDE256_FILE | indent
+  tar xvf $BUILD_DIR/$LIBDE265_FILE | indent
 
-  echo "-----> Building Lib256"
-  cd $LIBDE256_DIR
-  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBDE256_INSTALL_DIR
+  echo "-----> Building Lib265"
+  cd $LIBDE265_DIR
+  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBDE265_INSTALL_DIR
   make && make install
   cd ..
-  rm -rf $LIBDE256_DIR
+  rm -rf $LIBDE265_DIR
 
   # cache for future deploys
-  echo "-----> Caching Lib256 installation"
+  echo "-----> Caching Lib265 installation"
   cd $VENDOR_DIR
-  REL_LIBDE256_INSTALL_DIR="libde256"
-  tar czf $REL_LIBDE256_INSTALL_DIR.tar.gz $REL_LIBDE256_INSTALL_DIR
+  REL_LIBDE265_INSTALL_DIR="libde265"
+  tar czf $REL_LIBDE265_INSTALL_DIR.tar.gz $REL_LIBDE265_INSTALL_DIR
 
   if [ ! -d $CACHE_DIR ]; then
     mkdir -p $CACHE_DIR
   fi
 
-  mv $REL_LIBDE256_INSTALL_DIR.tar.gz $LIBDE256_CACHE_FILE
-  FAILED_LIBDE256=false
+  mv $REL_LIBDE265_INSTALL_DIR.tar.gz $LIBDE265_CACHE_FILE
+  FAILED_LIBDE265=false
 else
   # cache exists, extract it
-  echo "-----> Extracting Lib256 $LIBDE256_CACHE_FILE => $VENDOR_DIR"
+  echo "-----> Extracting Lib265 $LIBDE265_CACHE_FILE => $VENDOR_DIR"
   mkdir -p $VENDOR_DIR
-  tar xzf $LIBDE256_CACHE_FILE -C $VENDOR_DIR
+  tar xzf $LIBDE265_CACHE_FILE -C $VENDOR_DIR
 fi
-echo "-----> Done installing Lib256. All set for Lib256."
+echo "-----> Done installing Lib265. All set for Lib265."
 
 if [ "$INSTALL_FAILED" = true ]; then
-  echo "-----> Lib256 installation failed. Exiting."
+  echo "-----> Lib265 installation failed. Exiting."
   exit 1
 fi
 
@@ -100,10 +100,10 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
 
   echo "-----> Building LibHEIF"
   cd $LIBHEIF_DIR
-  export CPPFLAGS="-I$LIBDE256_INSTALL_DIR/include"
-  export CFLAGS="-I$LIBDE256_INSTALL_DIR/include"
-  export LDFLAGS="-L$LIBDE256_INSTALL_DIR/lib"
-  export PKG_CONFIG_PATH="$LIBDE256_INSTALL_DIR/lib/pkgconfig"
+  export CPPFLAGS="-I$LIBDE265_INSTALL_DIR/include"
+  export CFLAGS="-I$LIBDE265_INSTALL_DIR/include"
+  export LDFLAGS="-L$LIBDE265_INSTALL_DIR/lib"
+  export PKG_CONFIG_PATH="$LIBDE265_INSTALL_DIR/lib/pkgconfig"
 
   cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
   make && make install
