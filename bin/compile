@@ -9,21 +9,22 @@ echo "-----> Install ImageMagick"
 BUILD_DIR=$1
 CACHE_DIR=$2
 VENDOR_DIR="$BUILD_DIR/vendor"
+
 IMAGE_MAGICK_INSTALL_DIR="$VENDOR_DIR/imagemagick"
 IMAGE_MAGICK_VERSION="${IMAGE_MAGICK_VERSION:-7.1.1-47}"
 IMAGE_MAGICK_CACHE_FILE="$CACHE_DIR/imagemagick-$IMAGE_MAGICK_VERSION.tar.gz"
 
-LIBHEIF_VERSION="${LIBHEIF_VERSION:-1.19.8}"
 LIBHEIF_INSTALL_DIR="$VENDOR_DIR/libheif"
+LIBHEIF_VERSION="${LIBHEIF_VERSION:-1.19.8}"
 LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
 # install libheif
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
+  echo "-----> Installing dependencies - LibHEIF1"
   LIBHEIF_INSTALL_FAILED=true
   echo "-----> Installing cmake for libheif"
   apt-get install cmake
 
-  echo "-----> Installing dependencies - LibHEIF1"
   LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
   LIBHEIF_DIR="libheif-$IMAGE_MAGICK_VERSION"
   LIBHEIF_URL="https://github.com/strukturag/libheif/releases/download/v$LIBHEIF_VERSION/$LIBHEIF_FILE"
@@ -40,8 +41,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   tar xvf $BUILD_DIR/$LIBHEIF_FILE | indent
 
   echo "-----> Building LibHEIF"
-  cd libheif-$LIBHEIF_VERSION
-
+  cd $LIBHEIF_DIR
   cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
   make && make install
   cd ..
