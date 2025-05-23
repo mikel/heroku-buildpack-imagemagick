@@ -38,13 +38,13 @@ if [ ! -f $LIBDE265_CACHE_FILE ]; then
 
   echo "-----> Extracting libde265 from $BUILD_DIR/$LIBDE265_FILE"
   if [ ! -f $BUILD_DIR/$LIBDE265_FILE ]; then
-    echo "Error: Unable to download Lib265" | indent
+    echo "Error: Unable to download libde265" | indent
     ls $BUILD_DIR | indent
     exit 1;
   fi
   tar xvf $BUILD_DIR/$LIBDE265_FILE | indent
 
-  echo "-----> Building Lib265"
+  echo "-----> Building libde265"
   cd $LIBDE265_DIR
   cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBDE265_INSTALL_DIR
   make && make install
@@ -52,7 +52,7 @@ if [ ! -f $LIBDE265_CACHE_FILE ]; then
   rm -rf $LIBDE265_DIR
 
   # cache for future deploys
-  echo "-----> Caching Lib265 installation"
+  echo "-----> Caching libde265 installation"
   cd $VENDOR_DIR
   REL_LIBDE265_INSTALL_DIR="libde265"
   tar czf $REL_LIBDE265_INSTALL_DIR.tar.gz $REL_LIBDE265_INSTALL_DIR
@@ -65,14 +65,14 @@ if [ ! -f $LIBDE265_CACHE_FILE ]; then
   FAILED_LIBDE265=false
 else
   # cache exists, extract it
-  echo "-----> Extracting Lib265 $LIBDE265_CACHE_FILE => $VENDOR_DIR"
+  echo "-----> Extracting libde265 $LIBDE265_CACHE_FILE => $VENDOR_DIR"
   mkdir -p $VENDOR_DIR
   tar xzf $LIBDE265_CACHE_FILE -C $VENDOR_DIR
 fi
-echo "-----> Done installing Lib265. All set for Lib265."
+echo "-----> Done installing libde265. All set for libde265."
 
 if [ "$INSTALL_FAILED" = true ]; then
-  echo "-----> Lib265 installation failed. Exiting."
+  echo "-----> libde265 installation failed. Exiting."
   exit 1
 fi
 
@@ -100,12 +100,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
 
   echo "-----> Building LibHEIF"
   cd $LIBHEIF_DIR
-  export CPPFLAGS="-I$LIBDE265_INSTALL_DIR/include"
-  export CFLAGS="-I$LIBDE265_INSTALL_DIR/include"
-  export LDFLAGS="-L$LIBDE265_INSTALL_DIR/lib"
-  export PKG_CONFIG_PATH="$LIBDE265_INSTALL_DIR/lib/pkgconfig"
-
-  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
+  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR LIBDE265_INCLUDE_DIRS=$LIBDE265_INSTALL_DIR/include LIBDE265_LIBRARIES=$LIBDE265_INSTALL_DIR/lib
   make && make install
   cd ..
   rm -rf $LIBHEIF_DIR
