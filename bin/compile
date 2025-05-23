@@ -26,7 +26,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   apt-get install cmake
 
   LIBHEIF_FILE="libheif-$LIBHEIF_VERSION.tar.gz"
-  LIBHEIF_DIR="libheif-$IMAGE_MAGICK_VERSION"
+  LIBHEIF_DIR="libheif-$LIBHEIF_VERSION"
   LIBHEIF_URL="https://github.com/strukturag/libheif/releases/download/v$LIBHEIF_VERSION/$LIBHEIF_FILE"
 
   echo "-----> Downloading LibHEIF from $LIBHEIF_URL"
