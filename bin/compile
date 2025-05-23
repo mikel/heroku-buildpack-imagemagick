@@ -43,7 +43,7 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   cd libheif-$LIBHEIF_VERSION
 
   cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
-  make
+  make && make install
   cd ..
   rm -rf $LIBHEIF_DIR
 
