@@ -18,6 +18,64 @@ LIBHEIF_INSTALL_DIR="$VENDOR_DIR/libheif"
 LIBHEIF_VERSION="${LIBHEIF_VERSION:-1.19.8}"
 LIBHEIF_CACHE_FILE="$CACHE_DIR/libheif-$LIBHEIF_VERSION.tar.gz"
 
+LIB256_INSTALL_DIR="$VENDOR_DIR/lib256"
+LIB256_VERSION="${LIB256_VERSION:-1.0.16}"
+LIB256_CACHE_FILE="$CACHE_DIR/lib256-$LIB256_VERSION.tar.gz"
+
+# install libde265
+if [ ! -f $LIB256_CACHE_FILE ]; then
+  echo "-----> Installing dependencies - Lib256"
+  LIB256_INSTALL_FAILED=true
+  echo "-----> Installing cmake for lib256"
+  apt-get install cmake
+
+  LIB256_FILE="lib256-$LIB256_VERSION.tar.gz"
+  LIB256_DIR="lib256-$LIB256_VERSION"
+  LIB256_URL="https://github.com/strukturag/lib256/releases/download/v$LIB256_VERSION/$LIB256_FILE"
+
+  echo "-----> Downloading Lib256 from $LIB256_URL"
+  wget $LIB256_URL -P $BUILD_DIR | indent
+
+  echo "-----> Extracting Lib256 from $BUILD_DIR/$LIB256_FILE"
+  if [ ! -f $BUILD_DIR/$LIB256_FILE ]; then
+    echo "Error: Unable to download Lib256" | indent
+    ls $BUILD_DIR | indent
+    exit 1;
+  fi
+  tar xvf $BUILD_DIR/$LIB256_FILE | indent
+
+  echo "-----> Building Lib256"
+  cd $LIB256_DIR
+  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIB256_INSTALL_DIR
+  make && make install
+  cd ..
+  rm -rf $LIB256_DIR
+
+  # cache for future deploys
+  echo "-----> Caching Lib256 installation"
+  cd $VENDOR_DIR
+  REL_LIB256_INSTALL_DIR="lib256"
+  tar czf $REL_LIB256_INSTALL_DIR.tar.gz $REL_LIB256_INSTALL_DIR
+
+  if [ ! -d $CACHE_DIR ]; then
+    mkdir -p $CACHE_DIR
+  fi
+
+  mv $REL_LIB256_INSTALL_DIR.tar.gz $LIB256_CACHE_FILE
+  FAILED_LIB256=false
+else
+  # cache exists, extract it
+  echo "-----> Extracting Lib256 $LIB256_CACHE_FILE => $VENDOR_DIR"
+  mkdir -p $VENDOR_DIR
+  tar xzf $LIB256_CACHE_FILE -C $VENDOR_DIR
+fi
+echo "-----> Done installing Lib256. All set for Lib256."
+
+if [ "$INSTALL_FAILED" = true ]; then
+  echo "-----> Lib256 installation failed. Exiting."
+  exit 1
+fi
+
 # install libheif
 if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   echo "-----> Installing dependencies - LibHEIF1"
@@ -42,6 +100,11 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
 
   echo "-----> Building LibHEIF"
   cd $LIBHEIF_DIR
+  export CPPFLAGS="-I$LIB256_INSTALL_DIR/include"
+  export CFLAGS="-I$LIB256_INSTALL_DIR/include"
+  export LDFLAGS="-L$LIB256_INSTALL_DIR/lib"
+  export PKG_CONFIG_PATH="$LIB256_INSTALL_DIR/lib/pkgconfig"
+
   cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
   make && make install
   cd ..
