@@ -42,15 +42,15 @@ if [ ! -f $LIBHEIF_CACHE_FILE ]; then
   echo "-----> Building LibHEIF"
   cd libheif-$LIBHEIF_VERSION
 
-  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR -DHEIF_ENABLE_EXAMPLES=OFF -DHEIF_ENABLE_TESTS=OFF -DHEIF_ENABLE_TOOLS=OFF -DHEIF_ENABLE_SHARED=OFF -DHEIF_ENABLE_STATIC=ON .
-  make && make install
+  cmake --preset=release -DCMAKE_INSTALL_PREFIX=$LIBHEIF_INSTALL_DIR
+  make
   cd ..
   rm -rf $LIBHEIF_DIR
 
   # cache for future deploys
   echo "-----> Caching LibHEIF installation"
   cd $VENDOR_DIR
-  REL_IMAGE_LIBHEIF_DIR="libheif"
+  REL_IMAGE_LIBHEIF_INSTALL_DIR="libheif"
   tar czf $REL_LIBHEIF_INSTALL_DIR.tar.gz $REL_LIBHEIF_INSTALL_DIR
 
   if [ ! -d $CACHE_DIR ]; then
